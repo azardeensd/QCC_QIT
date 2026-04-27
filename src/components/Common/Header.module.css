@@ -1,0 +1,81 @@
+.header {
+  background-color: #0946d4; /* Deep Navy/Black */
+  color: #ffffff;
+  padding: 1.5rem;
+  border-bottom: 2px solid #e2e8f0; /* Silver/Light Grey accent */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 100%;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logoSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.8rem;
+  letter-spacing: -1px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.title span {
+  color: #f3f3f3; /* Muted silver/slate */
+  font-weight: 300;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #f4f4f5;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.statusBadge {
+  display: flex;
+  align-items: center;
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  background-color: #22c55e;
+  border-radius: 50%;
+  margin-right: 8px;
+  animation: blink 2s infinite;
+}
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+@media (max-width: 600px) {
+  .header {
+    padding: 1rem;
+  }
+  .title {
+    font-size: 1.4rem;
+  }
+  .statusBadge {
+    display: none; /* Hide on small screens for cleaner look */
+  }
+}

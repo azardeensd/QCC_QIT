@@ -1,0 +1,169 @@
+/* Update these specific classes in your Attendance.module.css */
+
+.card {
+  background: #ffffff;
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  
+  /* The 105% Width Logic */
+  width: 105%; 
+  max-width: 500px; /* Limits how big it gets on desktop */
+  
+  /* Centering Logic for widths > 100% */
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  
+  border-top: 6px solid #0f172a;
+  box-sizing: border-box; /* Ensures padding doesn't add to width */
+}
+
+/* For very small screens, ensure it doesn't look broken */
+@media (max-width: 400px) {
+  .card {
+    padding: 1.5rem;
+    width: 125%; /* Slightly smaller over-width for tiny phones */
+  }
+}
+
+.formTitle {
+  margin-bottom: 1.5rem;
+  color: #da9f1f;
+  font-size: 1.75rem;
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: -0.025em;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem; /* Consistent spacing between groups */
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.inputGroup label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Unified styling for Inputs and Selects */
+.inputGroup input, 
+.select {
+  padding: 0.875rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 1rem;
+  color: #1e293b;
+  background-color: #ffffff;
+  transition: all 0.2s ease;
+  appearance: none; /* Removes default styling on mobile */
+}
+
+.inputGroup input:focus, 
+.select:focus {
+  outline: none;
+  border-color: #0f172a;
+  box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.1);
+  background-color: #fff;
+}
+
+/* Style for the select dropdown arrow */
+.select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='C19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1.25rem;
+  padding-right: 2.5rem;
+}
+
+.divider {
+  border: 0;
+  border-top: 2px solid #f1f5f9;
+  margin: 0.5rem 0;
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 1rem;
+  background-color: #0f172a;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s active;
+  margin-top: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.submitBtn:hover {
+  background-color: #1e293b;
+  transform: translateY(-1px);
+}
+
+/* Important for mobile touch feedback */
+.submitBtn:active {
+  transform: translateY(1px);
+  opacity: 0.8;
+}
+
+.submitBtn:disabled {
+  background-color: #cbd5e1;
+  color: #94a3b8;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.feedback {
+  text-align: center;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background-color: #ecfdf5;
+  color: #065f46;
+  font-weight: 600;
+  border: 1px solid #d1fae5;
+}
+
+/* Location text below header */
+.locationSubtitle {
+  text-align: center;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-top: -1rem;
+  margin-bottom: 1.5rem;
+  background: #f1f5f9;
+  padding: 0.5rem;
+  border-radius: 8px;
+}
+
+/* ADMIN PORTAL CONTAINER */
+.adminContainer {
+  margin-top: 2rem;
+  padding: 2rem;
+  background: #fff;
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 450px;
+}
+
+/* HIDE ON MOBILE (Screens smaller than 768px) */
+@media (max-width: 768px) {
+  .adminContainer {
+    display: none !important;
+  }
+}
