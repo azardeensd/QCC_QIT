@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './Attendance.module.css';
 import { saveAttendance, getCompanies, getLocation, updateLocation } from '../../services/api';
+import { supabase } from '../../services/auth';
 
 const AdminPortal = ({ onLocationUpdate }) => {
   const [newLoc, setNewLoc] = useState('');
@@ -71,25 +72,62 @@ const Attendance = () => {
   }, [userType]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    if (name === 'genId') {
-      const val = value.replace(/\D/g, '').slice(0, 6);
-      setFormData({ ...formData, [name]: val });
-    } 
-    else if (name === 'mobile') {
-      const val = value.replace(/\D/g, '').slice(0, 10);
-      setFormData({ ...formData, [name]: val });
-    } 
-    else {
-      setFormData({ ...formData, [name]: value });
-    }
-  };
+  const { name, value } = e.target;
+
+  if (name === 'genId') {
+    // Allow letters and numbers, limit to 10 characters (or your preferred length)
+    const val = value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 7);; 
+    setFormData({ ...formData, [name]: val });
+  } 
+  else if (name === 'mobile') {
+    // Keep mobile as strictly numeric
+    const val = value.replace(/\D/g, '').slice(0, 10);
+    setFormData({ ...formData, [name]: val });
+  } 
+  else {
+    setFormData({ ...formData, [name]: value });
+  }
+};                                                                  
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage('');
+  e.preventDefault();
+  setLoading(true);
+  setMessage('');
 
+  try {
+    if (userType === 'Employee') {
+      // 1. Fetch any existing record for this Gen ID
+      const { data: existingUser, error: fetchError } = await supabase
+        .from('attendance')
+        .select('name, company')
+        .eq('gen_id', formData.genId)
+        .maybeSingle(); // Gets one record or null
+
+      if (fetchError) throw fetchError;
+
+      if (existingUser) {
+        // CASE 1: Same ID + Same Name + Same Company
+        if (
+          existingUser.name.toLowerCase() === formData.name.toLowerCase() &&
+          existingUser.company === formData.company
+        ) {
+          setMessage("Duplicate entry: You have already submitted attendance.");
+        } 
+        // CASE 2: Same ID but different Name
+        else if (existingUser.name.toLowerCase() !== formData.name.toLowerCase()) {
+          setMessage(`Block: ID ${formData.genId} is already registered to another person.`);
+        }
+        // CASE 3: Same ID + Same Name but different Company
+        else {
+          setMessage(`Block: You are already registered under ${existingUser.company}. Only one company allowed.`);
+        }
+        
+        setLoading(false);
+        return; // Stop the process here
+      }
+    }
+
+    // 2. All checks passed (ID is brand new) -> Proceed to Save
     const submissionData = {
       type: userType,
       name: formData.name,
@@ -98,17 +136,17 @@ const Attendance = () => {
       ...(userType === 'Employee' ? { gen_id: formData.genId } : { mobile: formData.mobile })
     };
 
-    try {
-      await saveAttendance(submissionData);
-      setMessage('Attendance recorded successfully!');
-      setFormData({ genId: '', name: '', company: '', mobile: '' });
-    } catch (error) {
-      console.error("Error:", error);
-      setMessage('Error saving data. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+    await saveAttendance(submissionData);
+    setMessage('Attendance recorded successfully!');
+    setFormData({ genId: '', name: '', company: '', mobile: '' });
+
+  } catch (error) {
+    console.error("Validation Error:", error);
+    setMessage(`Error: ${error.message}`);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className={styles.container}>
@@ -135,7 +173,7 @@ const Attendance = () => {
             /* EMPLOYEE FORM ORDER: 1. Company, 2. Gen ID, 3. Name */
             <>
               <div className={styles.inputGroup}>
-                <label>Company Name</label>
+                <label>Plant Name</label>
                 <select
                   name="company"
                   value={formData.company}
@@ -158,7 +196,7 @@ const Attendance = () => {
                   value={formData.genId} 
                   onChange={handleChange} 
                   required 
-                  placeholder="6-digit Numeric ID"
+                  placeholder="Enter Gen ID"
                 />
               </div>
 
