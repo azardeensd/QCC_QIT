@@ -191,7 +191,7 @@ const Attendance = () => {
               <div className={styles.inputGroup}>
                 <label>Gen ID</label>
                 <input 
-                  type="tel" 
+                  type="text" 
                   name="genId" 
                   value={formData.genId} 
                   onChange={handleChange} 
