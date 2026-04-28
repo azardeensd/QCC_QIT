@@ -12,9 +12,9 @@ const Header = () => {
           
           <div className={styles.textWrapper}>
             <h1 className={styles.title}>
-              QCC & QIT <span>Attendance</span>
+              QCC & QIT <span>Competition</span>
             </h1>
-            <p className={styles.subtitle}>Judge & Employee Registry</p>
+            <p className={styles.subtitle}>Participate Registry</p>
           </div>
         </div>
         
