@@ -3,16 +3,11 @@
   padding: 2.5rem;
   border-radius: 16px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  
-  /* The 105% Width Logic */
   width: 105%; 
-  max-width: 500px; /* Limits how big it gets on desktop */
-  
-  /* Centering Logic for widths > 100% */
+  max-width: 500px; 
   position: relative;
   left: 50%;
   transform: translateX(-50%);
-  
   border-top: 6px solid #1149ca;
   box-sizing: border-box; /* Ensures padding doesn't add to width */
 }
