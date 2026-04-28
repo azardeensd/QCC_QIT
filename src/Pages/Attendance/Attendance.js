@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import styles from './Attendance.module.css';
 import { saveAttendance, getCompanies, getLocation, updateLocation } from '../../services/api';
 
-// Admin Portal Component (Defined here for convenience, hidden via CSS on mobile)
 const AdminPortal = ({ onLocationUpdate }) => {
   const [newLoc, setNewLoc] = useState('');
   const [status, setStatus] = useState('');
@@ -44,13 +43,11 @@ const Attendance = () => {
     genId: '',
     name: '',
     company: '',
-    mobile: '',
-    email: ''
+    mobile: ''
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
-  // Fetch initial data (Companies and Training Location)
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
@@ -68,16 +65,18 @@ const Attendance = () => {
     fetchInitialData();
   }, []);
 
+  // Reset relevant fields when switching user types
+  useEffect(() => {
+    setFormData({ genId: '', name: '', company: '', mobile: '' });
+  }, [userType]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     if (name === 'genId') {
-      // 6-digit strictly numeric
       const val = value.replace(/\D/g, '').slice(0, 6);
       setFormData({ ...formData, [name]: val });
     } 
     else if (name === 'mobile') {
-      // 10-digit strictly numeric
       const val = value.replace(/\D/g, '').slice(0, 10);
       setFormData({ ...formData, [name]: val });
     } 
@@ -91,29 +90,20 @@ const Attendance = () => {
     setLoading(true);
     setMessage('');
 
-    const submissionData = userType === 'Employee' 
-      ? { 
-          type: 'Employee',
-          gen_id: formData.genId,
-          name: formData.name,
-          company: formData.company,
-          mobile: formData.mobile,
-          location: locationName // Added to record where they are
-        }
-      : { 
-          type: 'Other',
-          name: formData.name,
-          email: formData.email,
-          mobile: formData.mobile,
-          location: locationName
-        };
+    const submissionData = {
+      type: userType,
+      name: formData.name,
+      company: formData.company,
+      location: locationName,
+      ...(userType === 'Employee' ? { gen_id: formData.genId } : { mobile: formData.mobile })
+    };
 
     try {
       await saveAttendance(submissionData);
       setMessage('Attendance recorded successfully!');
-      setFormData({ genId: '', name: '', company: '', mobile: '', email: '' });
+      setFormData({ genId: '', name: '', company: '', mobile: '' });
     } catch (error) {
-      console.error("Supabase Error:", error);
+      console.error("Error:", error);
       setMessage('Error saving data. Please try again.');
     } finally {
       setLoading(false);
@@ -124,29 +114,42 @@ const Attendance = () => {
     <div className={styles.container}>
       <div className={styles.card}>
         <h2 className={styles.formTitle}>Event Registration</h2>
-        
-        {/* Dynamic Location Subtitle */}
-        <div className={styles.locationSubtitle}>
-          📍 {locationName}
-        </div>
+        <div className={styles.locationSubtitle}>📍 {locationName}</div>
         
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.inputGroup}>
-            <label>I am an:</label>
+            <label>User Type</label>
             <select 
               value={userType} 
               onChange={(e) => setUserType(e.target.value)}
               className={styles.select}
             >
-              <option value="Employee">Employee</option>
-              <option value="Other">Other (Guest)</option>
+              <option value="Employee">Rane Employee</option>
+              <option value="Guest">Guest</option>
             </select>
           </div>
 
           <hr className={styles.divider} />
 
           {userType === 'Employee' ? (
+            /* EMPLOYEE FORM ORDER: 1. Company, 2. Gen ID, 3. Name */
             <>
+              <div className={styles.inputGroup}>
+                <label>Company Name</label>
+                <select
+                  name="company"
+                  value={formData.company}
+                  onChange={handleChange}
+                  required
+                  className={styles.select}
+                >
+                  <option value="">Select Company</option>
+                  {companies.map((c, index) => (
+                    <option key={index} value={c.name}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+
               <div className={styles.inputGroup}>
                 <label>Gen ID</label>
                 <input 
@@ -158,6 +161,7 @@ const Attendance = () => {
                   placeholder="6-digit Numeric ID"
                 />
               </div>
+
               <div className={styles.inputGroup}>
                 <label>Full Name</label>
                 <input 
@@ -166,28 +170,25 @@ const Attendance = () => {
                   value={formData.name} 
                   onChange={handleChange} 
                   required 
+                  placeholder="Enter your name"
                 />
-              </div>
-              <div className={styles.inputGroup}>
-                <label>Company</label>
-                <select
-                  name="company"
-                  value={formData.company}
-                  onChange={handleChange}
-                  required
-                  className={styles.select}
-                >
-                  <option value="">Select Company</option>
-                  {companies.map((c, index) => (
-                    <option key={index} value={c.name}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
               </div>
             </>
           ) : (
+            /* GUEST FORM ORDER: 1. Company, 2. Name, 3. Mobile No */
             <>
+              <div className={styles.inputGroup}>
+                <label>Company Name</label>
+                <input 
+                  type="text" 
+                  name="company" 
+                  value={formData.company} 
+                  onChange={handleChange} 
+                  required 
+                  placeholder="Type your company name"
+                />
+              </div>
+
               <div className={styles.inputGroup}>
                 <label>Full Name</label>
                 <input 
@@ -196,32 +197,23 @@ const Attendance = () => {
                   value={formData.name} 
                   onChange={handleChange} 
                   required 
+                  placeholder="Enter your name"
                 />
               </div>
+
               <div className={styles.inputGroup}>
-                <label>Mail ID</label>
+                <label>Mobile No</label>
                 <input 
-                  type="email" 
-                  name="email" 
-                  value={formData.email} 
+                  type="tel" 
+                  name="mobile" 
+                  value={formData.mobile} 
                   onChange={handleChange} 
                   required 
+                  placeholder="10-digit number"
                 />
               </div>
             </>
           )}
-
-          <div className={styles.inputGroup}>
-            <label>Mobile No</label>
-            <input 
-              type="tel" 
-              name="mobile" 
-              value={formData.mobile} 
-              onChange={handleChange} 
-              required 
-              placeholder="10-digit number"
-            />
-          </div>
 
           <button type="submit" className={styles.submitBtn} disabled={loading}>
             {loading ? 'Processing...' : 'Submit Attendance'}
@@ -231,7 +223,6 @@ const Attendance = () => {
         </form>
       </div>
 
-      {/* Admin Portal Section - Controlled by CSS for desktop view only */}
       <AdminPortal onLocationUpdate={(val) => setLocationName(val)} />
     </div>
   );
