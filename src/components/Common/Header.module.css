@@ -1,5 +1,5 @@
 .header {
-  background-color: #0946d4; /* Deep Navy/Black */
+  background-color: #0a2d7d; /* Deep Navy/Black */
   color: #ffffff;
   padding: 1.5rem;
   border-bottom: 2px solid #e2e8f0; /* Silver/Light Grey accent */
@@ -13,11 +13,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.logoSection {
-  display: flex;
-  flex-direction: column;
 }
 
 .title {
@@ -77,5 +72,44 @@
   }
   .statusBadge {
     display: none; /* Hide on small screens for cleaner look */
+  }
+}
+
+.logoSection {
+  display: flex;
+  align-items: center; /* Centers logo vertically with text */
+  gap: 1rem;           /* Space between logo and text */
+}
+
+.logo {
+  height: 50px;        /* Adjust size as needed */
+  width: auto;         /* Maintains aspect ratio */
+  object-fit: contain;
+}
+
+.textWrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+/* Ensure mobile responsiveness */
+@media (max-width: 480px) {
+  .logo {
+    height: 40px; /* Slightly smaller on phones */
+  }
+  .title {
+    font-size: 1.2rem;
   }
 }
