@@ -1,29 +1,22 @@
-/* Update these specific classes in your Attendance.module.css */
-
 .card {
   background: #ffffff;
-  padding: 2.5rem;
+  padding: 2rem;
   border-radius: 16px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  
-  /* The 105% Width Logic */
-  width: 105%; 
-  max-width: 500px; /* Limits how big it gets on desktop */
-  
-  /* Centering Logic for widths > 100% */
-  position: relative;
-  left: 50%;
-  transform: translateX(-50%);
-  
-  border-top: 6px solid #0f172a;
-  box-sizing: border-box; /* Ensures padding doesn't add to width */
+  width: 100%; 
+  max-width: 500px;
+  margin: 0 auto;
+  border-top: 6px solid #1351e1;
+  box-sizing: border-box;
+  overflow: hidden; 
 }
 
-/* For very small screens, ensure it doesn't look broken */
-@media (max-width: 400px) {
+/* Mobile adjustments that won't break the layout */
+@media (max-width: 480px) {
   .card {
-    padding: 1.5rem;
-    width: 125%; /* Slightly smaller over-width for tiny phones */
+    padding: 1.25rem;
+    width: 100%; /* Keeps a small margin so it doesn't touch screen edges */
+    border-radius: 12px;
   }
 }
 
@@ -39,7 +32,7 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: .5rem; /* Consistent spacing between groups */
+  gap: .5rem;
 }
 
 .inputGroup {
@@ -51,7 +44,7 @@
   font-size: 0.75rem;
   font-weight: 700;
   color: #475569;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -65,8 +58,10 @@
   font-size: 1rem;
   color: #1e293b;
   background-color: #ffffff;
-  transition: all 0.2s ease;
-  appearance: none; /* Removes default styling on mobile */
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  appearance: none;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .inputGroup input:focus, 
@@ -74,7 +69,6 @@
   outline: none;
   border-color: #0f172a;
   box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.1);
-  background-color: #fff;
 }
 
 /* Style for the select dropdown arrow */
@@ -95,27 +89,25 @@
 .submitBtn {
   width: 100%;
   padding: 1rem;
-  background-color: #0f172a;
+  background-color: #0a41c3;
   color: #ffffff;
   border: none;
   border-radius: 12px;
   font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s active;
+  transition: transform 0.1s ease, background-color 0.2s ease;
   margin-top: 0.5rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .submitBtn:hover {
-  background-color: #1e293b;
-  transform: translateY(-1px);
+  background-color: #125dd5;
 }
 
-/* Important for mobile touch feedback */
 .submitBtn:active {
-  transform: translateY(1px);
-  opacity: 0.8;
+  transform: scale(0.98);
+  opacity: 0.9;
 }
 
 .submitBtn:disabled {
@@ -137,7 +129,6 @@
   border: 1px solid #d1fae5;
 }
 
-/* Location text below header */
 .locationSubtitle {
   text-align: center;
   color: #64748b;
@@ -150,18 +141,17 @@
   border-radius: 8px;
 }
 
-/* ADMIN PORTAL CONTAINER */
 .adminContainer {
-  margin-top: 2rem;
+  margin: 2rem auto;
   padding: 2rem;
   background: #fff;
   border: 2px dashed #cbd5e1;
   border-radius: 12px;
   width: 100%;
   max-width: 450px;
+  box-sizing: border-box;
 }
 
-/* HIDE ON MOBILE (Screens smaller than 768px) */
 @media (max-width: 768px) {
   .adminContainer {
     display: none !important;
