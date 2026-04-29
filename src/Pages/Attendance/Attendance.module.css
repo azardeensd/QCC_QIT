@@ -1,3 +1,5 @@
+
+
 .card {
   background: #ffffff;
   padding: 2.5rem;
@@ -13,7 +15,7 @@
 }
 
 /* For very small screens, ensure it doesn't look broken */
-@media (max-width: 400px) {
+@media (max-width: 600px) {
   .card {
     padding: 1.5rem;
     width: 125%; /* Slightly smaller over-width for tiny phones */
