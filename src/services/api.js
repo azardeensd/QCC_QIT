@@ -19,7 +19,6 @@ export const getCompanies = async () => {
   return data;
 };
 
-// Add to D:\QCC_QTT_Attendance\frontend\src\services\api.js
 
 export const getLocation = async () => {
   const { data, error } = await supabase
