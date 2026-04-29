@@ -1,33 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styles from './Dashboard.module.css';
 import { supabase } from '../../services/auth';
 
 const Dashboard = () => {
-  const [originalData, setOriginalData] = useState([]); // Master list
-  const [filteredData, setFilteredData] = useState([]); // List shown in table
+  const [originalData, setOriginalData] = useState([]); 
+  const [filteredData, setFilteredData] = useState([]); 
   const [loading, setLoading] = useState(true);
   
-  // Filter States
   const [plantFilter, setPlantFilter] = useState('All');
   const [typeFilter, setTypeFilter] = useState('All');
   const [dateFilter, setDateFilter] = useState('');
 
   const [stats, setStats] = useState([
-    { label: 'Total Attendees', value: '0', color: '#0f172a' },
-    { label: 'Employees', value: '0', color: '#065f46' },
-    { label: 'Plants Involved', value: '0', color: '#1351e1' },
+    { label: 'Total Attendees', value: '0', color: '#e2820d' },
+    { label: 'Employees', value: '0', color: '#17a67e' },
+    { label: 'Plants Involved', value: '0', color: '#054bef' },
   ]);
 
-  useEffect(() => {
-    fetchAttendance();
+  const calculateStats = useCallback((data) => {
+    const total = data.length;
+    const employees = data.filter(item => item.type === 'Employee').length;
+    const uniquePlants = [...new Set(data.map(item => item.company))].length;
+
+    setStats([
+      { label: 'Total Attendees', value: total.toString(), color: '#e2820d' },
+      { label: 'Employees', value: employees.toString(), color: '#17a67e' },
+      { label: 'Unique Plants', value: uniquePlants.toString(), color: '#c90bd0' },
+    ]);
   }, []);
 
-  // Run filter logic whenever a filter state or original data changes
-  useEffect(() => {
-    applyFilters();
-  }, [plantFilter, typeFilter, dateFilter, originalData]);
-
-  const fetchAttendance = async () => {
+  const fetchAttendance = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -45,22 +47,19 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [calculateStats]);
 
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     let updatedList = [...originalData];
 
-    // Filter by Plant
     if (plantFilter !== 'All') {
       updatedList = updatedList.filter(item => item.company === plantFilter);
     }
 
-    // Filter by Type
     if (typeFilter !== 'All') {
       updatedList = updatedList.filter(item => item.type === typeFilter);
     }
 
-    // Filter by Date (Comparing YYYY-MM-DD)
     if (dateFilter) {
       updatedList = updatedList.filter(item => {
         const itemDate = new Date(item.created_at).toISOString().split('T')[0];
@@ -69,21 +68,41 @@ const Dashboard = () => {
     }
 
     setFilteredData(updatedList);
+  }, [plantFilter, typeFilter, dateFilter, originalData]);
+
+  useEffect(() => {
+    fetchAttendance();
+  }, [fetchAttendance]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [applyFilters]);
+
+  // CSV Download Logic
+  const downloadReport = () => {
+    if (filteredData.length === 0) return alert("No data to download");
+
+    const headers = ["Date", "Name", "ID/Mobile", "Company", "Location", "Type"];
+    const csvRows = filteredData.map(row => [
+      new Date(row.created_at).toLocaleDateString(),
+      `"${row.name}"`,
+      row.gen_id || row.mobile || 'N/A',
+      `"${row.company}"`,
+      `"${row.location}"`,
+      row.type
+    ].join(','));
+
+    const csvContent = [headers.join(','), ...csvRows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `attendance_report_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
-  const calculateStats = (data) => {
-    const total = data.length;
-    const employees = data.filter(item => item.type === 'Employee').length;
-    const uniquePlants = [...new Set(data.map(item => item.company))].length;
-
-    setStats([
-      { label: 'Total Attendees', value: total.toString(), color: '#0f172a' },
-      { label: 'Employees', value: employees.toString(), color: '#065f46' },
-      { label: 'Guest', value: uniquePlants.toString(), color: '#1351e1' },
-    ]);
-  };
-
-  // Get unique plants for the dropdown dynamically
   const uniquePlantsList = ['All', ...new Set(originalData.map(item => item.company))];
 
   if (loading) {
@@ -106,7 +125,6 @@ const Dashboard = () => {
         ))}
       </section>
 
-      {/* --- NEW FILTER BAR --- */}
       <section className={styles.filterBar}>
         <div className={styles.filterGroup}>
           <label>Plant / Company</label>
@@ -135,11 +153,20 @@ const Dashboard = () => {
           />
         </div>
 
-        <button className={styles.resetBtn} onClick={() => {
-          setPlantFilter('All');
-          setTypeFilter('All');
-          setDateFilter('');
-        }}>Reset Filters</button>
+        <div className={styles.buttonGroup} style={{ display: 'flex', gap: '10px' }}>
+            <button className={styles.resetBtn} onClick={() => {
+              setPlantFilter('All');
+              setTypeFilter('All');
+              setDateFilter('');
+            }}>Reset</button>
+            
+            <button 
+              onClick={downloadReport}
+              style={{ backgroundColor: '#2b19d3', color: 'white', padding: '8px 16px', borderRadius: '6px', border: 'none', cursor: 'pointer' }}
+            >
+              Download Report
+            </button>
+        </div>
       </section>
 
       <section className={styles.tableCard}>
@@ -150,6 +177,7 @@ const Dashboard = () => {
           <table className={styles.table}>
             <thead>
               <tr>
+                <th>Date</th> {/* Moved to front */}
                 <th>Name</th>
                 <th>Gen ID / Mobile</th>
                 <th>Company/Plant</th>
@@ -160,6 +188,7 @@ const Dashboard = () => {
             <tbody>
               {filteredData.map((row) => (
                 <tr key={row.id}>
+                  <td>{new Date(row.created_at).toLocaleDateString()}</td> {/* Date column data */}
                   <td>{row.name}</td>
                   <td>{row.gen_id || row.mobile || 'N/A'}</td>
                   <td>{row.company}</td>
