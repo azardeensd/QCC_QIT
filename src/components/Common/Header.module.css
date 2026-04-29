@@ -14,6 +14,14 @@
   justify-content: space-between;
   align-items: center;
 }
+.title sup {
+  font-size: 0.6em;       /* Makes the 'nd' smaller */
+  top: -0.5em;           /* Adjusts how high it sits */
+  position: relative;
+  vertical-align: baseline;
+  font-weight: 700;      /* Keeps it bold like the numbers */
+  margin-left: 2px;      /* Adds a tiny gap from the number */
+}
 
 .title {
   margin: 0;
