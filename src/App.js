@@ -3,7 +3,9 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from '../src/components/Common/Header';
 import Attendance from '../src/Pages/Attendance/Attendance';
 import Dashboard from '../src/Pages/Dashboard/Dashboard';
-import './App.css'; // General layout styles
+import Login from '../src/Pages/Login/Login'; // Import Login
+import ProtectedRoute from '../src/components/Common/ProtectedRoute'; // Import Protected Route
+import './App.css'; 
 
 function App() {
   return (
@@ -13,11 +15,21 @@ function App() {
         
         <main className="content-area">
           <Routes>
-            {/* The main attendance form */}
+            {/* The main attendance form (Public) */}
             <Route path="/" element={<Attendance />} />
             
-            {/* The admin dashboard */}
-            <Route path="/dashboard" element={<Dashboard />} />
+            {/* The Login route (Public) */}
+            <Route path="/login" element={<Login />} />
+            
+            {/* The admin dashboard (Protected) */}
+            <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
           </Routes>
         </main>
 
