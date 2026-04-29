@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom'; // <-- Added for logout navigation
 import styles from './Dashboard.module.css';
 import { supabase } from '../../services/auth';
 
 const Dashboard = () => {
+  const navigate = useNavigate(); // <-- Initialize navigate
+
   const [originalData, setOriginalData] = useState([]); 
   const [filteredData, setFilteredData] = useState([]); 
   const [loading, setLoading] = useState(true);
@@ -78,6 +81,14 @@ const Dashboard = () => {
     applyFilters();
   }, [applyFilters]);
 
+  // --- NEW: Logout Logic ---
+  const handleLogout = () => {
+    // Clear the user data from local storage
+    localStorage.removeItem('user');
+    // Send them back to the login page
+    navigate('/login');
+  };
+
   // CSV Download Logic
   const downloadReport = () => {
     if (filteredData.length === 0) return alert("No data to download");
@@ -111,9 +122,18 @@ const Dashboard = () => {
 
   return (
     <div className={styles.dashboardContainer}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>Attendance Overview</h1>
-        <p className={styles.subtitle}>Live Data with Dynamic Filtering</p>
+      
+      {/* Updated Header with inline flex to push the button to the right */}
+      <header className={styles.header} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h1 className={styles.title}>Attendance Overview</h1>
+          <p className={styles.subtitle}>Live Data with Dynamic Filtering</p>
+        </div>
+        
+        {/* The Desktop-only Logout Button */}
+        <button onClick={handleLogout} className={styles.logoutButton}>
+          Logout
+        </button>
       </header>
 
       <section className={styles.statsGrid}>
@@ -177,7 +197,7 @@ const Dashboard = () => {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Date</th> {/* Moved to front */}
+                <th>Date</th> 
                 <th>Name</th>
                 <th>Gen ID / Mobile</th>
                 <th>Company/Plant</th>
@@ -188,7 +208,7 @@ const Dashboard = () => {
             <tbody>
               {filteredData.map((row) => (
                 <tr key={row.id}>
-                  <td>{new Date(row.created_at).toLocaleDateString()}</td> {/* Date column data */}
+                  <td>{new Date(row.created_at).toLocaleDateString()}</td> 
                   <td>{row.name}</td>
                   <td>{row.gen_id || row.mobile || 'N/A'}</td>
                   <td>{row.company}</td>
