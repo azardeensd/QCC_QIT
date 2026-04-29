@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // 1. Added Import
 import styles from './Attendance.module.css';
 import { saveAttendance, getCompanies, getLocation, updateLocation } from '../../services/api';
 import { supabase } from '../../services/auth';
@@ -6,6 +7,7 @@ import { supabase } from '../../services/auth';
 const AdminPortal = ({ onLocationUpdate }) => {
   const [newLoc, setNewLoc] = useState('');
   const [status, setStatus] = useState('');
+  const navigate = useNavigate(); // 2. Initialize Navigate
 
   const handleUpdate = async () => {
     if (!newLoc) return;
@@ -21,8 +23,11 @@ const AdminPortal = ({ onLocationUpdate }) => {
 
   return (
     <div className={styles.adminContainer}>
-      <h3>Admin: Set Training Location</h3>
+      <h3>Admin Panel</h3>
+      
+      {/* Location Update Section */}
       <div className={styles.inputGroup}>
+        <label>Set Training Location</label>
         <input 
           type="text" 
           value={newLoc} 
@@ -30,8 +35,22 @@ const AdminPortal = ({ onLocationUpdate }) => {
           placeholder="Enter new address..."
         />
       </div>
-      <button onClick={handleUpdate} className={styles.submitBtn}>Update Location</button>
+      <button onClick={handleUpdate} className={styles.submitBtn}>
+        Update Location
+      </button>
+      
       {status && <p className={styles.feedback}>{status}</p>}
+
+      <hr className={styles.divider} style={{ margin: '1.5rem 0' }} />
+
+      {/* 3. Dashboard Navigation Button */}
+      <button 
+        onClick={() => navigate('/dashboard')}
+        className={styles.submitBtn} 
+        style={{ backgroundColor: '#475569' }}
+      >
+        View Admin Dashboard
+      </button>
     </div>
   );
 };
@@ -66,87 +85,78 @@ const Attendance = () => {
     fetchInitialData();
   }, []);
 
-  // Reset relevant fields when switching user types
   useEffect(() => {
     setFormData({ genId: '', name: '', company: '', mobile: '' });
   }, [userType]);
 
   const handleChange = (e) => {
-  const { name, value } = e.target;
+    const { name, value } = e.target;
 
-  if (name === 'genId') {
-    // Allow letters and numbers, limit to 10 characters (or your preferred length)
-    const val = value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 7);; 
-    setFormData({ ...formData, [name]: val });
-  } 
-  else if (name === 'mobile') {
-    // Keep mobile as strictly numeric
-    const val = value.replace(/\D/g, '').slice(0, 10);
-    setFormData({ ...formData, [name]: val });
-  } 
-  else {
-    setFormData({ ...formData, [name]: value });
-  }
-};                                                                  
+    if (name === 'genId') {
+      const val = value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 7);
+      setFormData({ ...formData, [name]: val });
+    } 
+    else if (name === 'mobile') {
+      const val = value.replace(/\D/g, '').slice(0, 10);
+      setFormData({ ...formData, [name]: val });
+    } 
+    else {
+      setFormData({ ...formData, [name]: value });
+    }
+  };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  setMessage('');
+    e.preventDefault();
+    setLoading(true);
+    setMessage('');
 
-  try {
-    if (userType === 'Employee') {
-      // 1. Fetch any existing record for this Gen ID
-      const { data: existingUser, error: fetchError } = await supabase
-        .from('attendance')
-        .select('name, company')
-        .eq('gen_id', formData.genId)
-        .maybeSingle(); // Gets one record or null
+    try {
+      if (userType === 'Employee') {
+        const { data: existingUser, error: fetchError } = await supabase
+          .from('attendance')
+          .select('name, company')
+          .eq('gen_id', formData.genId)
+          .maybeSingle();
 
-      if (fetchError) throw fetchError;
+        if (fetchError) throw fetchError;
 
-      if (existingUser) {
-        // CASE 1: Same ID + Same Name + Same Company
-        if (
-          existingUser.name.toLowerCase() === formData.name.toLowerCase() &&
-          existingUser.company === formData.company
-        ) {
-          setMessage("Duplicate entry: You have already submitted attendance.");
-        } 
-        // CASE 2: Same ID but different Name
-        else if (existingUser.name.toLowerCase() !== formData.name.toLowerCase()) {
-          setMessage(`Block: ID ${formData.genId} is already registered to another person.`);
+        if (existingUser) {
+          if (
+            existingUser.name.toLowerCase() === formData.name.toLowerCase() &&
+            existingUser.company === formData.company
+          ) {
+            setMessage("Duplicate entry: You have already submitted attendance.");
+          } 
+          else if (existingUser.name.toLowerCase() !== formData.name.toLowerCase()) {
+            setMessage(`Block: ID ${formData.genId} is already registered to another person.`);
+          }
+          else {
+            setMessage(`Block: You are already registered under ${existingUser.company}. Only one company allowed.`);
+          }
+          setLoading(false);
+          return;
         }
-        // CASE 3: Same ID + Same Name but different Company
-        else {
-          setMessage(`Block: You are already registered under ${existingUser.company}. Only one company allowed.`);
-        }
-        
-        setLoading(false);
-        return; // Stop the process here
       }
+
+      const submissionData = {
+        type: userType,
+        name: formData.name,
+        company: formData.company,
+        location: locationName,
+        ...(userType === 'Employee' ? { gen_id: formData.genId } : { mobile: formData.mobile })
+      };
+
+      await saveAttendance(submissionData);
+      setMessage('Attendance recorded successfully!');
+      setFormData({ genId: '', name: '', company: '', mobile: '' });
+
+    } catch (error) {
+      console.error("Validation Error:", error);
+      setMessage(`Error: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
-
-    // 2. All checks passed (ID is brand new) -> Proceed to Save
-    const submissionData = {
-      type: userType,
-      name: formData.name,
-      company: formData.company,
-      location: locationName,
-      ...(userType === 'Employee' ? { gen_id: formData.genId } : { mobile: formData.mobile })
-    };
-
-    await saveAttendance(submissionData);
-    setMessage('Attendance recorded successfully!');
-    setFormData({ genId: '', name: '', company: '', mobile: '' });
-
-  } catch (error) {
-    console.error("Validation Error:", error);
-    setMessage(`Error: ${error.message}`);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className={styles.container}>
@@ -170,7 +180,6 @@ const Attendance = () => {
           <hr className={styles.divider} />
 
           {userType === 'Employee' ? (
-            /* EMPLOYEE FORM ORDER: 1. Company, 2. Gen ID, 3. Name */
             <>
               <div className={styles.inputGroup}>
                 <label>Plant Name</label>
@@ -197,6 +206,7 @@ const Attendance = () => {
                   onChange={handleChange} 
                   required 
                   placeholder="Enter Gen ID"
+                  autoCapitalize="characters"
                 />
               </div>
 
@@ -213,7 +223,6 @@ const Attendance = () => {
               </div>
             </>
           ) : (
-            /* GUEST FORM ORDER: 1. Company, 2. Name, 3. Mobile No */
             <>
               <div className={styles.inputGroup}>
                 <label>Company Name</label>
