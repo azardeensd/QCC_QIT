@@ -45,3 +45,32 @@ body {
 .app-wrapper {
   animation: fadeIn 0.8s ease-in-out;
 }
+
+/* App.css */
+
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh; /* Use dynamic viewport height for mobile */
+  width: 100%;
+  overflow-x: hidden; /* Prevents horizontal jitter */
+}
+
+.content-area {
+  flex: 1; /* This pushes the footer to the bottom of the screen */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 20px 0;
+}
+
+.app-footer {
+  text-align: center;
+  padding: 1.5rem;
+  background-color: #f1f5f9;
+  color: #64748b;
+  font-size: 0.875rem;
+  border-top: 1px solid #e2e8f0;
+  width: 100%;
+}
