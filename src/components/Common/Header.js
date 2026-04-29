@@ -11,11 +11,11 @@ const Header = () => {
           <img src={logo} alt="Company Logo" className={styles.logo} />
           
           <div className={styles.textWrapper}>
-            <h1 className={styles.title}>
-              QCC & QIT <span>Competition</span>
-            </h1>
-            <p className={styles.subtitle}>Participate Registry</p>
-          </div>
+  <h1 className={styles.title}>
+    22<sup>nd</sup> RML Excellence Award 
+    <span> Registration</span>
+  </h1>
+</div>
         </div>
         
         <div className={styles.statusBadge}>
